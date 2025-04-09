@@ -1,6 +1,7 @@
 const SubChunk13 = require('../1.3/SubChunk')
 const { StorageType } = require('../common/constants')
 const PalettedStorage = require('../common/PalettedStorage')
+const neededBits = require('../../pc/common/neededBits')
 
 class SubChunk118 extends SubChunk13 {
   loadRuntimePalette (storageLayer, stream, paletteSize) {
@@ -13,11 +14,20 @@ class SubChunk118 extends SubChunk13 {
     }
   }
 
+  addToPalette (l, stateId, count = 0) {
+    const block = this.registry.blocksByRuntimeId[stateId]
+    this.palette[l].push({ stateId, name: block.name, states: block.states, count })
+    const minBits = neededBits(this.palette[l].length - 1)
+    if (minBits > this.blocks[l].bitsPerBlock) {
+      this.blocks[l] = this.blocks[l].resize(minBits)
+    }
+  }
+
   loadPalettedBlocks (storageLayer, stream, bitsPerBlock, format) {
     if ((format === StorageType.Runtime) && (bitsPerBlock === 0)) {
       this.palette[storageLayer] = []
       this.blocks[storageLayer] = new PalettedStorage(1)
-      const stateId = stream.readVarInt() >> 1
+      const stateId = stream.readZigZagVarInt()
       this.addToPalette(storageLayer, stateId)
       return
     }
