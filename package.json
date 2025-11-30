@@ -1,8 +1,11 @@
 {
-  "name": "prismarine-chunk",
+  "name": "@mc-zuri/prismarine-chunk",
   "version": "1.39.0",
   "description": "A class to hold chunk data for prismarine",
   "main": "index.js",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "types": "./types/index.d.ts",
   "scripts": {
     "test": "mocha --reporter spec --exit",
@@ -12,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PrismarineJS/prismarine-chunk.git"
+    "url": "https://github.com/mc-zuri/prismarine-chunk.git"
   },
   "keywords": [
     "minecraft",
@@ -31,9 +34,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/PrismarineJS/prismarine-chunk/issues"
+    "url": "https://github.com/mc-zuri/prismarine-chunk/issues"
   },
-  "homepage": "https://github.com/PrismarineJS/prismarine-chunk",
+  "homepage": "https://github.com/mc-zuri/prismarine-chunk",
   "devDependencies": {
     "@types/node": "^24.1.0",
     "bedrock-protocol": "^3.47.0",
