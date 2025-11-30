@@ -7,10 +7,9 @@ class SubChunk118 extends SubChunk13 {
     this.palette[storageLayer] = []
 
     for (let i = 0; i < paletteSize; i++) {
-      const runtimeId = stream.readZigZagVarInt()
-      const block = this.registry.supportFeature('blockHashes') ? this.registry.blocksByRuntimeId[runtimeId] : this.registry.blockStates[runtimeId]
-
-      this.palette[storageLayer][i] = { ...block, stateId: runtimeId, count: 0 }
+      const stateId = stream.readZigZagVarInt()
+      const block = this.registry.blocksByStateId[stateId]
+      this.palette[storageLayer][i] = { stateId, ...block, count: 0 }
     }
   }
 
