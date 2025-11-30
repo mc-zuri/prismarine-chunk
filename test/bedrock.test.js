@@ -10,6 +10,7 @@ const BlobStore = Map
 
 for (const version of versions) {
   const registryForVersionCheck = require('prismarine-registry')(version)
+
   describe('bedrock network chunks on ' + version, () => {
     it('can re-encode level_chunk packet without caching, block block_network_ids_are_hashes = false', async () => {
       await reEncodeLevelChunkWithoutCaching(false)
@@ -230,12 +231,22 @@ for (const version of versions) {
   })
 
   describe('bedrock subchunk tests on ' + version, () => {
-    it('compaction works on ' + version, async () => {
+    it(`compaction works on ${version}, block block_network_ids_are_hashes = false`, async () => {
+      await compactChunkSectionWorks(false)
+    })
+
+    if (registryForVersionCheck.version['>=']('1.18')) {
+      it(`compaction works on ${version}, block_network_ids_are_hashes = true`, async () => {
+        await compactChunkSectionWorks(true)
+      })
+    }
+
+    async function compactChunkSectionWorks (blockNetworkIdsAreHashes) {
       const registry = require('prismarine-registry')(version)
+      registry.handleStartGame({ block_network_ids_are_hashes: blockNetworkIdsAreHashes, itemstates: [] })
       const ChunkColumn = require('prismarine-chunk')(registry)
-      registry.handleStartGame({ block_network_ids_are_hashes: false, itemstates: [] })
       const cc = new ChunkColumn({ x: 0, z: 0 })
-      const fakeBlocks = [1, 2, 3]
+      const fakeBlocks = [registry.blocksByName.dirt.defaultState, registry.blocksByName.acacia_door.defaultState, registry.blocksByName.stone.defaultState, registry.blocksByName.bamboo.defaultState]
       let i = 0
       for (let y = 0; y < 4; y++) {
         const section = await cc.newSection(y)
@@ -244,11 +255,11 @@ for (const version of versions) {
             // Here we set some blocks and replace it with air right after
             for (let z = 0; z < 16; z++) {
               section.setBlockStateId(l, x, y, z, fakeBlocks[i++ % fakeBlocks.length])
-              section.setBlockStateId(l, x, y, z, registryForVersionCheck.blocksByName.air.defaultState)
+              section.setBlockStateId(l, x, y, z, registry.blocksByName.air.defaultState)
             }
           }
           // Here we set some dirt. We don't replace it with air, so it should stay dirt
-          section.setBlockStateId(l, 0, 10, 0, registryForVersionCheck.blocksByName.dirt.defaultState)
+          section.setBlockStateId(l, 0, 10, 0, registry.blocksByName.dirt.defaultState)
         }
       }
 
@@ -263,7 +274,7 @@ for (const version of versions) {
           assert.strictEqual(subChunk.palette[l].length, 2, 'After compaction, palette size should be 2 on y=' + cy + ' layer=' + l)
         }
       }
-    })
+    }
   })
 }
 

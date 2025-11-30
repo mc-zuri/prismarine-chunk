@@ -104,9 +104,9 @@ class SubChunk {
     this.palette[storageLayer] = []
 
     for (let i = 0; i < paletteSize; i++) {
-      const index = stream.readZigZagVarInt()
-      const block = this.registry.blockStates[index]
-      this.palette[storageLayer][i] = { stateId: index, ...block, count: 0 }
+      const stateId = stream.readZigZagVarInt()
+      const block = this.registry.blocksByStateId[stateId]
+      this.palette[storageLayer][i] = { stateId: stateId, ...block, count: 0 }
     }
   }
 
@@ -271,7 +271,7 @@ class SubChunk {
   }
 
   addToPalette (l, stateId, count = 0) {
-    const block = this.registry.supportFeature('blockHashes') ? this.registry.blocksByRuntimeId[stateId] : this.registry.blockStates[stateId]
+    const block = this.registry.blocksByStateId[stateId]
     this.palette[l].push({ stateId, name: block.name, states: block.states, count })
     const minBits = neededBits(this.palette[l].length - 1)
     if (minBits > this.blocks[l].bitsPerBlock) {
