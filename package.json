@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PrismarineJS/prismarine-chunk.git"
+    "url": "https://github.com/mc-zuri/prismarine-chunk.git"
   },
   "keywords": [
     "minecraft",
@@ -31,12 +31,12 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/PrismarineJS/prismarine-chunk/issues"
+    "url": "https://github.com/mc-zuri/prismarine-chunk/issues"
   },
-  "homepage": "https://github.com/PrismarineJS/prismarine-chunk",
+  "homepage": "https://github.com/mc-zuri/prismarine-chunk",
   "devDependencies": {
     "@types/node": "^24.1.0",
-    "bedrock-protocol": "^3.47.0",
+    "bedrock-protocol": "^3.55.0",
     "expect": "^30.0.5",
     "minecraft-bedrock-server": "^1.5.0",
     "mocha": "^11.0.1",

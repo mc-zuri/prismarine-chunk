@@ -24,7 +24,9 @@ const chunkImplementations = {
     1.18: require('./bedrock/1.18/chunk'),
     1.19: require('./bedrock/1.18/chunk'),
     '1.20': require('./bedrock/1.18/chunk'),
-    1.21: require('./bedrock/1.18/chunk')
+    1.21: require('./bedrock/1.18/chunk'),
+    1.26: require('./bedrock/1.18/chunk'),
+    '26': require('./bedrock/1.18/chunk'),
   }
 }
 
@@ -34,7 +36,7 @@ const blobCache = require('./bedrock/common/BlobCache')
 module.exports.BlobEntry = blobCache.BlobEntry
 module.exports.BlobType = blobCache.BlobType
 
-function loader (registryOrVersion) {
+function loader(registryOrVersion) {
   const registry = typeof registryOrVersion === 'string' ? require('prismarine-registry')(registryOrVersion) : registryOrVersion
   const version = registry.version
   if (!version) throw new Error('Specified version does not exist')
