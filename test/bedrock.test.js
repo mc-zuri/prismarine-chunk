@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 const fs = require('fs')
 const { join } = require('path')
-const versions = ['bedrock_1.16.220', 'bedrock_1.17.10', 'bedrock_1.18.0', 'bedrock_1.19.1', 'bedrock_1.21.60']
+const versions = ['bedrock_1.16.220', 'bedrock_1.17.10', 'bedrock_1.18.0', 'bedrock_1.19.1', 'bedrock_1.21.60', 'bedrock_1.26.51']
 const assert = require('assert')
 
 const { BlobEntry, BlobType } = require('prismarine-chunk')
@@ -110,7 +110,8 @@ for (const version of versions) {
 
       assert(packet.cache_enabled, "you didn't dump packets correctly")
 
-      const misses = await column.networkDecode(packet.blobs.hashes, blobStore, payload)
+      const hashes = packet.blobs.hashes ?? packet.blobs
+      const misses = await column.networkDecode(hashes, blobStore, payload)
       assert(misses.length > 0, 'Blob cache should be empty, so networkDecode() should return the missing blob hashes')
 
       const missResponse = fixture.level_chunk_missResponse
@@ -120,13 +121,13 @@ for (const version of versions) {
       }
 
       // Run this function again, now that all blobs are in the store
-      const nowMissing = await column.networkDecode(packet.blobs.hashes, blobStore)
+      const nowMissing = await column.networkDecode(hashes, blobStore)
 
       assert(nowMissing.length === 0, 'Blob cache should be full, networkDecode() should return empty missing hashes')
 
       // Try re-encoding the cached packet data, make sure the hashes match
       const encoded = await column.networkEncode(blobStore)
-      const extraneousBlobs = encoded.blobs.map(blob => blob.hash.toString()).find(blob => !packet.blobs.hashes.includes(blob))
+      const extraneousBlobs = encoded.blobs.map(blob => blob.hash.toString()).find(blob => !hashes.includes(blob))
       if (extraneousBlobs) {
         throw new Error('Encoded payload contains extraneous blobs')
       }
