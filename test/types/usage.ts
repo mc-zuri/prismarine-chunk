@@ -1,5 +1,5 @@
 import loader = require('prismarine-chunk')
-import defaultLoader, { StorageType } from 'prismarine-chunk'
+import defaultLoader, { StorageType, BedrockChunk as BedrockChunkClass } from 'prismarine-chunk'
 import registryLoader = require('prismarine-registry')
 import { Vec3 } from 'vec3'
 
@@ -10,6 +10,8 @@ const stateId: number = pcChunk.getBlockStateId(new Vec3(0, 0, 0))
 const stateName: string = pcChunk.getBlockStateId(new Vec3(0, 0, 0))
 
 const BedrockChunk = loader(registryLoader('bedrock_1.21.60') as registryLoader.RegistryBedrock)
+// as bedrock-provider loads its chunk classes: an untyped registry gives either class
+const untyped = { 1.18: defaultLoader({ version: { type: 'bedrock', majorVersion: '1.18' } } as any) } as Record<string, typeof BedrockChunkClass>
 const bedrockChunk: loader.BedrockChunk = new BedrockChunk({ x: 0, z: 0 })
 // @ts-expect-error bedrock chunks need a blob store
 bedrockChunk.networkEncode()

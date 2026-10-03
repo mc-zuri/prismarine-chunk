@@ -217,9 +217,10 @@ declare class BedrockChunk extends CommonChunk {
   loadEntities(entities: Record<string, NBT>): void
 }
 
-declare function loader(registry: RegistryPc): typeof PCChunk
-declare function loader(registry: RegistryBedrock): typeof BedrockChunk
-declare function loader(mcVersionOrRegistry: string | Registry): typeof PCChunk | typeof BedrockChunk
+// The chunk class of the registry's edition; either class for a version string or an untyped registry
+type ChunkOf<R> = R extends RegistryBedrock ? typeof BedrockChunk : R extends RegistryPc ? typeof PCChunk : typeof PCChunk | typeof BedrockChunk
+
+declare function loader<R extends string | Registry>(mcVersionOrRegistry: R): ChunkOf<R>
 
 declare namespace loader {
   export type { PCChunk, BedrockChunk, SubChunk, PaletteEntry, IBlobStore, CCHash, ExtendedBlock, IVec4 }
