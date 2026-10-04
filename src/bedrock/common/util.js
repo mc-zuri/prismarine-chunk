@@ -1,6 +1,14 @@
 const xxhash = require('xxhash-wasm')
 let hasher
 module.exports = {
+  // An NBT payload with the longs that JSON has as strings (ChunkColumn.toJson) back as bigints
+  reviveLongs (type, value) {
+    if (type === 'long') return typeof value === 'string' ? BigInt(value) : value
+    if (type === 'list' && Array.isArray(value.value)) value.value = value.value.map(item => module.exports.reviveLongs(value.type, item))
+    if (type === 'compound') for (const tag of Object.values(value)) tag.value = module.exports.reviveLongs(tag.type, tag.value)
+    return value
+  },
+
   async getChecksum (buffer) {
     if (!hasher) {
       hasher = await xxhash()

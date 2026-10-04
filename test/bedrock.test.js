@@ -308,6 +308,31 @@ describe('special bedrock tests', () => {
     assert.strictEqual(next.toJson(), json)
   })
 
+  it('serializes block entities with longs to JSON', async () => {
+    const nbt = require('prismarine-nbt')
+    const registry = require('prismarine-registry')('bedrock_1.21.60')
+    const ChunkColumn = require('prismarine-chunk')(registry)
+    const tag = nbt.comp({
+      id: nbt.string('TrialSpawner'),
+      x: nbt.int(1),
+      y: nbt.int(-60),
+      z: nbt.int(2),
+      cooldown_end_at: nbt.long(-5000000000n),
+      times: nbt.list(nbt.long([3n])),
+      name: nbt.string('7')
+    })
+    const stream = new Stream()
+    new ChunkColumn({ x: 0, z: 0 }).biomes[0].export(StorageType.Runtime, stream)
+    const column = new ChunkColumn({ x: 0, z: 0 })
+    // a block entity read over the network has its longs as bigints
+    column.networkDecodeNoCache(Buffer.concat([stream.getBuffer(), Buffer.from([0]), nbt.writeUncompressed(tag, 'littleVarint')]), -2)
+    column.setBlockStateId(new Vec3(1, -60, 2), registry.blocksByName.trial_spawner.defaultState)
+
+    const next = ChunkColumn.fromJson(column.toJson())
+    assert.deepStrictEqual(next.getBlockEntity(new Vec3(1, -60, 2)), column.getBlockEntity(new Vec3(1, -60, 2)))
+    assert.deepStrictEqual(await next.networkEncodeSubChunkNoCache(-4), await column.networkEncodeSubChunkNoCache(-4))
+  })
+
   it('counts the blocks of single state sub chunks', async () => {
     const registry = require('prismarine-registry')('bedrock_1.21.60')
     const ChunkColumn = require('prismarine-chunk')(registry)
