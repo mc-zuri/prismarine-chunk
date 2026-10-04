@@ -42,6 +42,11 @@ class ProxyBiomeSection {
   export (format, stream) {
     stream.writeUInt8(0xff)
   }
+
+  // JSON has no link to the previous section: written as a copy of it
+  toObject () {
+    return this.target.toObject()
+  }
 }
 
 module.exports = ProxyBiomeSection
