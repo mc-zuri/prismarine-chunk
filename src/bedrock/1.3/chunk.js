@@ -1,5 +1,6 @@
 const { ChunkVersion } = require('../common/constants')
 const ChunkColumn = require('./ChunkColumn')
+const { reviveLongs } = require('../common/util')
 
 module.exports = (version) => {
   // Require once here to avoid requiring() on every new chunk instance
@@ -14,7 +15,9 @@ module.exports = (version) => {
     }
 
     static fromJson (str) {
-      return new this(JSON.parse(str))
+      const options = JSON.parse(str)
+      for (const tag of Object.values(options.blockEntities ?? {})) reviveLongs(tag.type, tag.value)
+      return new this(options)
     }
   }
 }
