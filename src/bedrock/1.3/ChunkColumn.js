@@ -270,7 +270,8 @@ class ChunkColumn13 extends CommonChunkColumn {
   }
 
   toJson () {
-    return JSON.stringify(this.toObject())
+    // the longs of block entities read over the network are bigints, which JSON has no form for: written as strings
+    return JSON.stringify(this.toObject(), (key, value) => typeof value === 'bigint' ? value.toString() : value)
   }
 }
 
