@@ -338,8 +338,8 @@ async function generateTestData (version, chunkX, chunkZ, cachingEnabled, blockN
     client.queue('client_cache_blob_status', {
       misses: 0,
       haves: acks.length,
-      have: [],
-      missing: acks
+      have: acks,
+      missing: []
     })
   }
 
