@@ -207,3 +207,25 @@ for (const version of allVersions) {
     }
   })
 }
+
+describe('ChunkColumn with a minecraft-data release that predates 26.x', () => {
+  // minecraft-data releases from before 26.1 throw when a version is compared with 26.x
+  const registry = require('prismarine-registry')('1.20')
+  const version = {
+    ...registry.version,
+    '>=': other => {
+      if (other.startsWith('26.')) throw new RangeError(`Version '${other}' not found`)
+      return registry.version['>='](other)
+    }
+  }
+  const olderRegistry = Object.create(registry, { version: { value: version } })
+
+  it('loads 1.20 chunks', () => {
+    const ChunkColumn = require('prismarine-chunk')(olderRegistry)
+    const column = new ChunkColumn()
+    column.setBlockStateId(new Vec3(1, 2, 3), 10)
+    const column2 = new ChunkColumn()
+    column2.load(column.dump())
+    assert.strictEqual(column2.getBlockStateId(new Vec3(1, 2, 3)), 10)
+  })
+})

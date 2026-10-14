@@ -10,11 +10,21 @@ const CAVES_UPDATE_WORLD_HEIGHT = 384
 
 // wrap with func to provide version specific Block
 module.exports = (Block, mcData) => {
+  // A minecraft-data release older than `version` does not know it and throws a RangeError when
+  // compared with it. The version it was loaded for is then older than `version`.
+  const atLeast = version => {
+    try {
+      return mcData.version['>='](version)
+    } catch (e) {
+      if (e instanceof RangeError) return false
+      throw e
+    }
+  }
   // 1.21.5+ writes no size prefix before chunk containers, it's computed dynamically to save 1 byte
-  const noSizePrefix = mcData.version['>=']('1.21.5')
-  const hasFluidCount = mcData.version['>=']('26.1')
+  const noSizePrefix = atLeast('1.21.5')
+  const hasFluidCount = atLeast('26.1')
   // 26.3+ sends the light masks (BitSet) as a byte array instead of a long array
-  const lightMasksAreByteArrays = mcData.version['>=']('26.3')
+  const lightMasksAreByteArrays = atLeast('26.3')
   const readLightMask = mask => lightMasksAreByteArrays ? BitArray.fromByteArray(mask, 1) : BitArray.fromLongArray(mask, 1)
   const writeLightMask = mask => lightMasksAreByteArrays ? mask.toByteArray() : mask.toLongArray()
   const ChunkSection = require('../common/PaletteChunkSection')(Block)
