@@ -164,3 +164,31 @@ Object.entries(bitarrays).forEach(([name, BitArray]) => {
     })
   })
 })
+
+describe('BitArrayNoSpan byte arrays (java.util.BitSet)', () => {
+  it('reads bit i from bit i % 8 of byte i / 8', () => {
+    const bitArr = BitArrayNoSpan.fromByteArray(Buffer.from([0x01, 0x82, 0x00, 0x02]), 1)
+    const set = []
+    for (let i = 0; i < bitArr.capacity; i++) if (bitArr.get(i)) set.push(i)
+    assert.deepStrictEqual(set, [0, 9, 15, 25])
+  })
+
+  it('reads the same bits as the long array encoding', () => {
+    const fromBytes = BitArrayNoSpan.fromByteArray(Buffer.from([0x01, 0x82, 0x00, 0x02]), 1)
+    const fromLongs = BitArrayNoSpan.fromLongArray([[0, 0x02008201]], 1)
+    for (let i = 0; i < 64; i++) assert.strictEqual(fromBytes.get(i), fromLongs.get(i), `bit ${i}`)
+  })
+
+  it('writes trailing zero bytes trimmed, like BitSet.toByteArray', () => {
+    const bitArr = new BitArrayNoSpan({ capacity: 26, bitsPerValue: 1 })
+    bitArr.set(1, 1)
+    bitArr.set(10, 1)
+    assert.deepStrictEqual(bitArr.toByteArray(), Buffer.from([0x02, 0x04]))
+    assert.deepStrictEqual(new BitArrayNoSpan({ capacity: 26, bitsPerValue: 1 }).toByteArray(), Buffer.alloc(0))
+  })
+
+  it('cycles through bytes', () => {
+    const bytes = Buffer.from([0xff, 0x00, 0x5a, 0x03])
+    assert.deepStrictEqual(BitArrayNoSpan.fromByteArray(bytes, 1).toByteArray(), bytes)
+  })
+})

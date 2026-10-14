@@ -13,6 +13,10 @@ module.exports = (Block, mcData) => {
   // 1.21.5+ writes no size prefix before chunk containers, it's computed dynamically to save 1 byte
   const noSizePrefix = mcData.version['>=']('1.21.5')
   const hasFluidCount = mcData.version['>=']('26.1')
+  // 26.3+ sends the light masks (BitSet) as a byte array instead of a long array
+  const lightMasksAreByteArrays = mcData.version['>=']('26.3')
+  const readLightMask = mask => lightMasksAreByteArrays ? BitArray.fromByteArray(mask, 1) : BitArray.fromLongArray(mask, 1)
+  const writeLightMask = mask => lightMasksAreByteArrays ? mask.toByteArray() : mask.toLongArray()
   const ChunkSection = require('../common/PaletteChunkSection')(Block)
   return class ChunkColumn extends CommonChunkColumn {
     static get section () { return ChunkSection }
@@ -286,8 +290,8 @@ module.exports = (Block, mcData) => {
     loadParsedLight(skyLight, blockLight, skyLightMask, blockLightMask, emptySkyLightMask, emptyBlockLightMask) {
       function readSection(sections, data, lightMask, pLightMask, emptyMask, pEmptyMask) {
         let currentSectionIndex = 0;
-        const incomingLightMask = BitArray.fromLongArray(pLightMask, 1);
-        const incomingEmptyMask = BitArray.fromLongArray(pEmptyMask, 1);
+        const incomingLightMask = readLightMask(pLightMask);
+        const incomingEmptyMask = readLightMask(pEmptyMask);
 
         for (let y = 0; y < sections.length; y++) {
           const isEmpty = incomingEmptyMask.get(y);
@@ -479,10 +483,10 @@ module.exports = (Block, mcData) => {
       return {
         skyLight,
         blockLight,
-        skyLightMask: this.skyLightMask.toLongArray(),
-        blockLightMask: this.blockLightMask.toLongArray(),
-        emptySkyLightMask: this.emptySkyLightMask.toLongArray(),
-        emptyBlockLightMask: this.emptyBlockLightMask.toLongArray()
+        skyLightMask: writeLightMask(this.skyLightMask),
+        blockLightMask: writeLightMask(this.blockLightMask),
+        emptySkyLightMask: writeLightMask(this.emptySkyLightMask),
+        emptyBlockLightMask: writeLightMask(this.emptyBlockLightMask)
       }
     }
 

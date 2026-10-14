@@ -75,6 +75,29 @@ class BitArray {
     return bitArray
   }
 
+  // java.util.BitSet.toByteArray(): bit i is bit (i % 8) of byte i / 8, trailing zero bytes dropped
+  toByteArray () {
+    const bytes = Buffer.alloc(Math.ceil(this.capacity * this.bitsPerValue / 8))
+    for (let i = 0; i < this.capacity; i++) {
+      if (this.get(i)) bytes[i >> 3] |= 1 << (i & 7)
+    }
+    let end = bytes.length
+    while (end > 0 && bytes[end - 1] === 0) end--
+    return bytes.subarray(0, end)
+  }
+
+  // java.util.BitSet.valueOf(byte[])
+  static fromByteArray (bytes, bitsPerValue) {
+    const bitArray = new BitArray({
+      capacity: Math.floor(8 / bitsPerValue) * bytes.length,
+      bitsPerValue
+    })
+    for (let i = 0; i < bytes.length * 8; i++) {
+      if ((bytes[i >> 3] >> (i & 7)) & 1) bitArray.set(i, 1)
+    }
+    return bitArray
+  }
+
   static or (a, b) {
     const long = a.data.length > b.data.length ? a.data : b.data
     const short = a.data.length > b.data.length ? b.data : a.data
