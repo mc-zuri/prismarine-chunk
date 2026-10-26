@@ -66,6 +66,13 @@ class Chunk {
     this.data = Buffer.alloc(BUFFER_SIZE)
 
     this.data.fill(0)
+    this.minY = 0
+    this.worldHeight = h
+  }
+
+  // the column's 16 high sections, as the later chunk versions list them (this format has none of its own)
+  get sections () {
+    return Array.from({ length: h / 16 }, () => true)
   }
 
   toJson () {
@@ -110,42 +117,52 @@ class Chunk {
   }
 
   getBlockType (pos) {
-    if (pos.y < 0 || pos.y >= 256) return 0
+    if (pos.y < 0 || pos.y >= h) return 0
     return this.data.readUInt8(getBlockCursor(pos))
   }
 
   setBlockType (pos, id) {
-    if (pos.y < 0 || pos.y >= 256) return
+    if (pos.y < 0 || pos.y >= h) return
     this.data.writeUInt8(id, getBlockCursor(pos))
   }
 
+  // a block's state id: its id and data value, as minecraft-data numbers the states of these versions
+  getBlockStateId (pos) {
+    return (this.getBlockType(pos) << 4) | this.getBlockData(pos)
+  }
+
+  setBlockStateId (pos, stateId) {
+    this.setBlockType(pos, stateId >> 4)
+    this.setBlockData(pos, stateId & 15)
+  }
+
   getBlockData (pos) {
-    if (pos.y < 0 || pos.y >= 256) return 0
+    if (pos.y < 0 || pos.y >= h) return 0
     return readUInt4LE(this.data, getBlockDataCursor(pos))
   }
 
   setBlockData (pos, data) {
-    if (pos.y < 0 || pos.y >= 256) return
+    if (pos.y < 0 || pos.y >= h) return
     writeUInt4LE(this.data, data, getBlockDataCursor(pos))
   }
 
   getBlockLight (pos) {
-    if (pos.y < 0 || pos.y >= 256) return 0
+    if (pos.y < 0 || pos.y >= h) return 0
     return readUInt4LE(this.data, getBlockLightCursor(pos))
   }
 
   setBlockLight (pos, light) {
-    if (pos.y < 0 || pos.y >= 256) return
+    if (pos.y < 0 || pos.y >= h) return
     writeUInt4LE(this.data, light, getBlockLightCursor(pos))
   }
 
   getSkyLight (pos) {
-    if (pos.y < 0 || pos.y >= 256) return 0
+    if (pos.y < 0 || pos.y >= h) return 0
     return readUInt4LE(this.data, getSkyLightCursor(pos))
   }
 
   setSkyLight (pos, light) {
-    if (pos.y < 0 || pos.y >= 256) return
+    if (pos.y < 0 || pos.y >= h) return
     writeUInt4LE(this.data, light, getSkyLightCursor(pos))
   }
 

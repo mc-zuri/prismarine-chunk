@@ -40,6 +40,13 @@ class Chunk {
     for (let j = 0; j < 256; j++) {
       this.data[j] = 1
     }
+    this.minY = 0
+    this.worldHeight = Chunk.h
+  }
+
+  // its sub chunks, as the later chunk versions call them
+  get sections () {
+    return this.chunks
   }
 
   toJson () {
@@ -49,7 +56,7 @@ class Chunk {
   static fromJson (j) {
     const parsed = JSON.parse(j)
     const chunk = new Chunk()
-    chunk.data = parsed.data
+    chunk.data = Buffer.from(parsed.data)
     chunk.chunks = parsed.sections.map(s => SubChunk.fromJson(s))
     return chunk
   }
@@ -92,6 +99,16 @@ class Chunk {
   setBlockType (pos, type) {
     const chunk = this.chunks[pos.y >> 4]
     return chunk && chunk.setBlockType(new Vec3(pos.x, pos.y - 16 * (pos.y >> 4), pos.z), type)
+  }
+
+  // a block's state id: its id and data value, as minecraft-data numbers the states of these versions
+  getBlockStateId (pos) {
+    return (this.getBlockType(pos) << 4) | this.getBlockData(pos)
+  }
+
+  setBlockStateId (pos, stateId) {
+    this.setBlockType(pos, stateId >> 4)
+    this.setBlockData(pos, stateId & 15)
   }
 
   getBlockData (pos) {

@@ -22,6 +22,8 @@ const chunkImplementations = {
   },
   bedrock: {
     0.14: () => require('./bedrock/0.14/chunk'),
+    // 0.15 keeps 0.14's 16 x 128 x 16 terrain: sub chunks come with 1.0
+    0.15: () => require('./bedrock/0.14/chunk'),
     '1.0': () => require('./bedrock/1.0/chunk'),
     1.3: () => require('./bedrock/1.3/chunk'),
     1.16: () => require('./bedrock/1.3/chunk'),
